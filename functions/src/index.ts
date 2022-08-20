@@ -30,7 +30,7 @@ app.use(cors())
 firebase.initializeApp()
 
 app.get("/test", (req, res) => {
-  res.json({ msg: "V-1.2.0: All okay!" })
+  res.json({ msg: "V-1.2.2: All okay!" })
 })
 app.get("/test-email/:email", async (req, res) => {
   const { email } = req.params

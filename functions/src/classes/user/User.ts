@@ -40,6 +40,12 @@ export default class User {
     month: number
     year: number
   }> = []
+  /**
+   * ! If Admin logged in to any user account, then he will get special access which
+   * ! are not available for any general user
+   * ? This field is only required to denote this.
+   */
+  loginBy: "SELF" | "ADMIN" = "SELF"
 
   constructor(user?: User) {
     this.appname = user && user.appname ? user.appname : ""
@@ -201,6 +207,7 @@ export default class User {
       totalWithdrawal,
       withdrawals,
       cryptoWalletAddress,
+      loginBy,
     } = this
     const groupA = this.groupA.map((a) => a.json())
     const groupB = this.groupB.map((b) => b.json())
@@ -234,6 +241,7 @@ export default class User {
       monthlyTurnover,
       income,
       bankAccount,
+      loginBy,
     }
   }
 
