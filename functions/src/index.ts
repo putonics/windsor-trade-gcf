@@ -19,6 +19,7 @@ import {
   getPendingPackages,
   servePackage,
   modifyAdmin,
+  resetPassword,
 } from "./classes/user/index"
 import * as functions from "firebase-functions"
 import * as firebase from "firebase-admin"
@@ -30,7 +31,7 @@ app.use(cors())
 firebase.initializeApp()
 
 app.get("/test", (req, res) => {
-  res.json({ msg: "V-1.2.2: All okay!" })
+  res.json({ msg: "V-1.2.3: All okay!" })
 })
 app.get("/test-email/:email", async (req, res) => {
   const { email } = req.params
@@ -59,6 +60,7 @@ app.get("/referer/:refdocid", checkReferer)
 ////////////////////////////////////////////////////////////////////
 app.post("/user/signup", signup)
 app.post("/user/signin", signin)
+app.post("/user/reset-password", resetPassword)
 app.post("/user/modify", modify)
 app.post("/user/load", load)
 app.post("/user/inactive", inactiveUsers)

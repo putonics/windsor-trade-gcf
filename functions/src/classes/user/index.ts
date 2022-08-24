@@ -6,6 +6,7 @@ import {
   sendEmail_Withdrawal,
   sendEmail_PackageRequestSent,
   sendEmail_WithdrawalRequest,
+  sendEmail,
 } from "./../email/index"
 import { firestore } from "firebase-admin"
 import { Request, Response } from "firebase-functions"
@@ -200,6 +201,59 @@ export const signin = async (request: Request, response: Response) => {
     }
   } else {
     console.log("signin: no data")
+    send(response, null)
+  }
+}
+
+//? API POST user/reset-password
+export const resetPassword = async (request: Request, response: Response) => {
+  // console.log('signin')
+  const data = receive(request)
+  if (data) {
+    // console.log('data')
+    const user = new User(data)
+    if (isValidDocRequest(user)) {
+      // console.log('valid')
+      const db = firestore()
+      try {
+        await db.runTransaction(async (t) => {
+          const doc = await t.get(
+            db.collection(COLLECTIONS.USER).doc(user.docid)
+          )
+          if (doc && doc.exists) {
+            const user2 = new User(doc.data() as User)
+            const NEW_PASSWORD =
+              "pw@" +
+              user2.docid.substring(2, 4) +
+              "#" +
+              ((Math.random() * 1000000) | 0) +
+              "$"
+            if (
+              await sendEmail(
+                user2.email,
+                "WINDSOR TRADE: Password reset",
+                "Please do not share this with any one else.",
+                `<div style="color:#777777;">Your new password is <span style="color:#cccccc;font-size:9px;">${NEW_PASSWORD}</span></div>
+            <h1 style="color:#aa2244;">You cannot login with your old-password anymore.</h1>`
+              )
+            ) {
+              user2.password = encryptPassword(NEW_PASSWORD, user2.docid)
+              t.update(doc.ref, user2.json())
+              console.log("user/password-reset: successfull")
+              send(response, user2.json())
+            }
+          }
+        })
+      } catch (e) {
+        console.log("user/password-reset: failed")
+        send(response, null)
+      }
+    } else {
+      console.log("user/password-reset: invalid request")
+      send(response, null)
+    }
+  } else {
+    console.log("user/password-reset: no-data")
     send(response, null)
   }
 }
