@@ -165,7 +165,10 @@ export const signin = async (request: Request, response: Response) => {
         .get()
       if (snap && snap.docs && snap.docs.length) {
         const user2 = new User(snap.docs[0].data() as User)
-        if (user.password === decryptPassword(user2.password, user2.docid)) {
+        if (
+          user.active &&
+          user.password === decryptPassword(user2.password, user2.docid)
+        ) {
           console.log("signin: success")
           user2.loginBy = "SELF"
           send(response, user2.json())
@@ -192,7 +195,7 @@ export const signin = async (request: Request, response: Response) => {
           send(response, null)
         }
       } else {
-        console.log("signin: not record found")
+        console.log("signin: no record found")
         send(response, null)
       }
     } else {
@@ -947,5 +950,55 @@ export const shareTurnover = async (request: Request, response: Response) => {
         send(response, null)
       }
     }
+  }
+}
+
+export const block = async (request: Request, response: Response) =>
+  setActive(request, response, false)
+
+export const unblock = async (request: Request, response: Response) =>
+  setActive(request, response, true)
+
+//API:POST: block/unblock user
+const setActive = async (
+  request: Request,
+  response: Response,
+  active: boolean
+) => {
+  // console.log('signin')
+  const data = receive(request)
+  if (data) {
+    // console.log('data')
+    const user = new User(data)
+    if (isValidDocRequest(user)) {
+      // console.log('valid')
+      const db = firestore()
+      const snap = await db
+        .collection(COLLECTIONS.USER)
+        .where("docid", "==", user.docid)
+        .limit(1)
+        .get()
+      if (
+        snap &&
+        snap.docs &&
+        snap.docs.length > 0 &&
+        user.loginBy === "ADMIN"
+      ) {
+        const user2 = new User(snap.docs[0].data() as User)
+        user2.active = active
+        snap.docs[0].ref.update({ active: active })
+        console.log(`${active ? "unblock" : "block"}: success`)
+        send(response, user2.json())
+      } else {
+        console.log(`${active ? "unblock" : "block"}: no record found`)
+        send(response, null)
+      }
+    } else {
+      console.log(`${active ? "unblock" : "block"}: invalid request`)
+      send(response, null)
+    }
+  } else {
+    console.log(`${active ? "unblock" : "block"}: no data`)
+    send(response, null)
   }
 }

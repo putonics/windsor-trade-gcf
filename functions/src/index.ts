@@ -20,6 +20,8 @@ import {
   servePackage,
   modifyAdmin,
   resetPassword,
+  block,
+  unblock,
 } from "./classes/user/index"
 import * as functions from "firebase-functions"
 import * as firebase from "firebase-admin"
@@ -31,7 +33,7 @@ app.use(cors())
 firebase.initializeApp()
 
 app.get("/test", (req, res) => {
-  res.json({ msg: "V-1.2.3: All okay!" })
+  res.json({ msg: "V-1.2.4: All okay!" })
 })
 app.get("/test-email/:email", async (req, res) => {
   const { email } = req.params
@@ -67,6 +69,9 @@ app.post("/user/inactive", inactiveUsers)
 app.post("/user/package", requestPackage)
 app.post("/user/withdraw", requestWithdrawal)
 app.post("/user/withdrawal-list", getWithdrawalList) //only 10 withdrawal only
+/////////////////////////////////////////////////////////////////////
+app.post("/user/block", block)
+app.post("/user/unblock", unblock)
 /////////////////////////////////////////////////////////////////////
 app.post("/admin/signin", adminSignin)
 app.post("/admin/modify", modifyAdmin)
