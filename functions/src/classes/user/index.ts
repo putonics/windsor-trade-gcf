@@ -1,4 +1,4 @@
-import Admin, { SUPERADMINDOCID } from "./Admin"
+import Admin, { ADMINDOCID, SUPERADMINDOCID } from "./Admin"
 import {
   sendEmail_UserRegistration,
   sendEmail_AddPackage,
@@ -116,6 +116,7 @@ export const signup = async (request: Request, response: Response) => {
                 user.createdon = modifiedon
                 user.modifiedon = modifiedon
                 referer.modifiedon = modifiedon
+                user.active = true
                 t.set(
                   db.collection(COLLECTIONS.USER).doc(user.docid),
                   user.json()
@@ -166,7 +167,7 @@ export const signin = async (request: Request, response: Response) => {
       if (snap && snap.docs && snap.docs.length) {
         const user2 = new User(snap.docs[0].data() as User)
         if (
-          user.active &&
+          user2.active &&
           user.password === decryptPassword(user2.password, user2.docid)
         ) {
           console.log("signin: success")
@@ -361,6 +362,41 @@ export const load = async (request: Request, response: Response) => {
     }
   } else {
     console.log("load: no data")
+    send(response, null)
+  }
+}
+
+//API:POST: new users
+export const newUsers = async (request: Request, response: Response) => {
+  const data = receive(request)
+  if (data) {
+    const user = new User(data)
+    if (isValidDocRequest(user)) {
+      console.log(request.path)
+      const db = firestore()
+      const snap = await db
+        .collection(COLLECTIONS.USER)
+        .where("docid", "!=", ADMINDOCID)
+        .where("packages", "==", [])
+        .where("active", "==", true)
+        .get()
+      if (snap && snap.docs && snap.docs.length) {
+        const users = new Array<any>()
+        snap.docs.forEach((doc) => {
+          users.push(new User(doc.data() as User).json())
+        })
+        console.log("inactiveUsers: success")
+        send(response, users)
+      } else {
+        console.log("inactiveUsers: no record found")
+        send(response, null)
+      }
+    } else {
+      console.log("inactiveUsers: invalid request")
+      send(response, null)
+    }
+  } else {
+    console.log("inactiveUsers: no data")
     send(response, null)
   }
 }
@@ -999,6 +1035,62 @@ const setActive = async (
     }
   } else {
     console.log(`${active ? "unblock" : "block"}: no data`)
+    send(response, null)
+  }
+}
+
+//? API POST user/reset-password
+export const resetAdminPassword = async (
+  request: Request,
+  response: Response
+) => {
+  // console.log('signin')
+  const data = receive(request)
+  if (data) {
+    // console.log('data')
+    const user = new User(data)
+    if (isValidDocRequest(user)) {
+      // console.log('valid')
+      const db = firestore()
+      try {
+        await db.runTransaction(async (t) => {
+          const doc = await t.get(
+            db.collection(COLLECTIONS.ADMIN).doc(user.docid)
+          )
+          if (doc && doc.exists) {
+            const user2 = new User(doc.data() as User)
+            const NEW_PASSWORD =
+              "pw@" +
+              user2.docid.substring(2, 4) +
+              "#" +
+              ((Math.random() * 1000000) | 0) +
+              "$"
+            if (
+              await sendEmail(
+                user2.email,
+                "WINDSOR TRADE: Password reset",
+                "Please do not share this with any one else.",
+                `<div style="color:#777777;">Your new password is <span style="color:#cccccc;font-size:9px;">${NEW_PASSWORD}</span></div>
+            <h1 style="color:#aa2244;">You cannot login with your old-password anymore.</h1>`
+              )
+            ) {
+              user2.password = encryptPassword(NEW_PASSWORD, user2.docid)
+              t.update(doc.ref, user2.json())
+              console.log("admin/password-reset: successfull")
+              send(response, user2.json())
+            }
+          }
+        })
+      } catch (e) {
+        console.log("admin/password-reset: failed")
+        send(response, null)
+      }
+    } else {
+      console.log("admin/password-reset: invalid request")
+      send(response, null)
+    }
+  } else {
+    console.log("admin/password-reset: no-data")
     send(response, null)
   }
 }

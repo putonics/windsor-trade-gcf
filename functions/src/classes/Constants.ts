@@ -1,16 +1,18 @@
-import { APPNAME, SUBSCRIBERDOCID } from './user/Admin';
+import { APPNAME, SUBSCRIBERDOCID } from "./user/Admin"
 //MAX_ limit should be taken as such that the number of fields must not exceed 10K per Doc
 // because firestore can index only 10K fileds per doc
-//Firestore Doc size 1MB (1,048,576 bytes) max; in addition Each Doc can hold 20K field max 
+//Firestore Doc size 1MB (1,048,576 bytes) max; in addition Each Doc can hold 20K field max
 export const COLLECTIONS = {
-    USER: 'users',
-    ADMIN: 'admins',
-    PACKAGES: 'packages',
-    WITHDRAWALS: 'withdrawals',
+  USER: "users",
+  ADMIN: "admins",
+  PACKAGES: "packages",
+  WITHDRAWALS: "withdrawals",
 }
 
 export const isValidDocRequest = (doc: any) => {
-    return Boolean(doc && doc.appname === APPNAME && doc.subscriberdocid === SUBSCRIBERDOCID)
+  return Boolean(
+    doc && doc.appname === APPNAME && doc.subscriberdocid === SUBSCRIBERDOCID
+  )
 }
 
 /*

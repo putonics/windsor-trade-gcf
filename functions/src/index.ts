@@ -22,10 +22,12 @@ import {
   resetPassword,
   block,
   unblock,
+  newUsers,
 } from "./classes/user/index"
 import * as functions from "firebase-functions"
 import * as firebase from "firebase-admin"
 import * as express from "express"
+// import { encryptPassword } from "./classes/CryptoServer"
 const cors = require("cors")
 ////////////////////////////////////////////////////////////////////////////////
 const app = express()
@@ -33,7 +35,7 @@ app.use(cors())
 firebase.initializeApp()
 
 app.get("/test", (req, res) => {
-  res.json({ msg: "V-1.2.4: All okay!" })
+  res.json({ msg: "V-1.6.0: All okay!" })
 })
 app.get("/test-email/:email", async (req, res) => {
   const { email } = req.params
@@ -42,8 +44,8 @@ app.get("/test-email/:email", async (req, res) => {
     "Testing Email",
     "",
     `
-        <!DOCTYPE html>
-        <html>
+    <!DOCTYPE html>
+    <html>
             <head>
                 <title>Windsor Trade</title>
             </head>
@@ -56,6 +58,12 @@ app.get("/test-email/:email", async (req, res) => {
   )
   res.json({ sent })
 })
+//////////////////////////////////////////////////////////////////////
+// app.get("/test/password", (req, res) => {
+//   res.json({
+//     password: encryptPassword("pw@WC#629785$", "WCSA000001"),
+//   })
+// })
 /////////////////////////////////////////////////////////////////////
 app.get("/email/:email", checkEmail)
 app.get("/referer/:refdocid", checkReferer)
@@ -66,6 +74,7 @@ app.post("/user/reset-password", resetPassword)
 app.post("/user/modify", modify)
 app.post("/user/load", load)
 app.post("/user/inactive", inactiveUsers)
+app.post("/user/new", newUsers)
 app.post("/user/package", requestPackage)
 app.post("/user/withdraw", requestWithdrawal)
 app.post("/user/withdrawal-list", getWithdrawalList) //only 10 withdrawal only
@@ -74,6 +83,7 @@ app.post("/user/block", block)
 app.post("/user/unblock", unblock)
 /////////////////////////////////////////////////////////////////////
 app.post("/admin/signin", adminSignin)
+app.post("/admin/reset-password", resetPassword)
 app.post("/admin/modify", modifyAdmin)
 app.post("/admin/package", addPackage)
 app.post("/admin/package-list", getPendingPackages)
