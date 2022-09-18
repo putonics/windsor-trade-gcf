@@ -878,7 +878,6 @@ export const clearPackage = async (request: Request, response: Response) => {
       const db = firestore()
       try {
         await db.collection(COLLECTIONS.PACKAGES).doc(pkg.docref.id).delete()
-        console.log(pkg)
         console.log("clearPackage: success")
         send(response, pkg.json())
       } catch (ex) {
