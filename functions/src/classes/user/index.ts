@@ -765,7 +765,9 @@ export const getPendingPackages = async (
       if (snap && snap.docs && snap.docs.length) {
         const packages = new Array<PackageRequest>()
         snap.docs.forEach((doc) => {
-          packages.push(new PackageRequest(doc.data() as PackageRequest))
+          const pr = new PackageRequest(doc.data() as PackageRequest)
+          pr.docref = { id: doc.ref.id }
+          packages.push(pr)
         })
         console.log("getPendingPackages: success")
         send(
@@ -875,7 +877,7 @@ export const clearPackage = async (request: Request, response: Response) => {
     if (isValidDocRequest(pkg)) {
       const db = firestore()
       try {
-        await db.collection(COLLECTIONS.PACKAGES).doc(pkg.docid).delete()
+        await db.collection(COLLECTIONS.PACKAGES).doc(pkg.docref.id).delete()
         console.log(pkg)
         console.log("clearPackage: success")
         send(response, pkg.json())
@@ -910,7 +912,9 @@ export const getPendingWithdrawals = async (
       if (snap && snap.docs && snap.docs.length) {
         const withdrawals = new Array<Withdrawal>()
         snap.docs.forEach((doc) => {
-          withdrawals.push(new Withdrawal(doc.data() as Withdrawal))
+          const w = new Withdrawal(doc.data() as Withdrawal)
+          w.docref = { id: doc.ref.id }
+          withdrawals.push(w)
         })
         console.log("getPendingWithdrawals: success")
         send(
@@ -1005,7 +1009,9 @@ export const clearWithdrawal = async (request: Request, response: Response) => {
     if (isValidDocRequest(withdrawal)) {
       const db = firestore()
       try {
-        db.collection(COLLECTIONS.WITHDRAWALS).doc(withdrawal.docid).delete()
+        db.collection(COLLECTIONS.WITHDRAWALS)
+          .doc(withdrawal.docref.id)
+          .delete()
         console.log("clearWithdrawal: success")
         send(response, withdrawal.json())
       } catch (ex) {
