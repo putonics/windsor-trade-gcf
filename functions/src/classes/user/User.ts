@@ -95,6 +95,8 @@ export default class User {
       user && user.monthlyTurnover
         ? user.monthlyTurnover
         : new Array<{ amount: number; month: number; year: number }>()
+
+    this.loginBy = user && user.loginBy ? user.loginBy : "SELF"
   }
 
   set(user?: User) {

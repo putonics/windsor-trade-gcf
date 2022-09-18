@@ -867,6 +867,31 @@ export const servePackage = async (request: Request, response: Response) => {
   }
 }
 
+export const clearPackage = async (request: Request, response: Response) => {
+  console.log("clearPackage: start")
+  const data = receive(request)
+  if (data) {
+    const pkg = new PackageRequest(data)
+    if (isValidDocRequest(pkg)) {
+      const db = firestore()
+      try {
+        await db.collection(COLLECTIONS.PACKAGES).doc(pkg.docid).delete()
+        console.log("clearPackage: success")
+        send(response, pkg.json())
+      } catch (ex) {
+        console.log("clearPackage: err: " + ex)
+        send(response, null)
+      }
+    } else {
+      console.log("clearPackage: invalid request")
+      send(response, null)
+    }
+  } else {
+    console.log("clearPackage: no data")
+    send(response, null)
+  }
+}
+
 export const getPendingWithdrawals = async (
   request: Request,
   response: Response
@@ -971,6 +996,31 @@ export const serveWithdrawal = async (request: Request, response: Response) => {
   }
 }
 
+export const clearWithdrawal = async (request: Request, response: Response) => {
+  const data = receive(request)
+  console.log("clearWithdrawal: start")
+  if (data) {
+    const withdrawal = new Withdrawal(data)
+    if (isValidDocRequest(withdrawal)) {
+      const db = firestore()
+      try {
+        db.collection(COLLECTIONS.WITHDRAWALS).doc(withdrawal.docid).delete()
+        console.log("clearWithdrawal: success")
+        send(response, withdrawal.json())
+      } catch (ex) {
+        console.log("clearWithdrawal: err: " + ex)
+        send(response, null)
+      }
+    } else {
+      console.log("clearWithdrawal: invalid request")
+      send(response, null)
+    }
+  } else {
+    console.log("clearWithdrawal: no data")
+    send(response, null)
+  }
+}
+
 export const shareTurnover = async (request: Request, response: Response) => {
   const data = receive(request)
   if (data) {
@@ -990,10 +1040,10 @@ export const shareTurnover = async (request: Request, response: Response) => {
 }
 
 export const block = async (request: Request, response: Response) =>
-  setActive(request, response, false)
+  await setActive(request, response, false)
 
 export const unblock = async (request: Request, response: Response) =>
-  setActive(request, response, true)
+  await setActive(request, response, true)
 
 //API:POST: block/unblock user
 const setActive = async (
@@ -1001,13 +1051,13 @@ const setActive = async (
   response: Response,
   active: boolean
 ) => {
-  // console.log('signin')
+  // console.log('setActive')
   const data = receive(request)
   if (data) {
-    // console.log('data')
+    // console.log(data)
     const user = new User(data)
     if (isValidDocRequest(user)) {
-      // console.log('valid')
+      // console.log("valid")
       const db = firestore()
       const snap = await db
         .collection(COLLECTIONS.USER)

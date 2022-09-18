@@ -23,6 +23,8 @@ import {
   block,
   unblock,
   newUsers,
+  clearPackage,
+  clearWithdrawal,
 } from "./classes/user/index"
 import * as functions from "firebase-functions"
 import * as firebase from "firebase-admin"
@@ -35,7 +37,7 @@ app.use(cors())
 firebase.initializeApp()
 
 app.get("/test", (req, res) => {
-  res.json({ msg: "V-1.6.0: All okay!" })
+  res.json({ msg: "V-1.7.0: All okay!" })
 })
 app.get("/test-email/:email", async (req, res) => {
   const { email } = req.params
@@ -88,8 +90,10 @@ app.post("/admin/modify", modifyAdmin)
 app.post("/admin/package", addPackage)
 app.post("/admin/package-list", getPendingPackages)
 app.post("/admin/package-serve", servePackage)
+app.post("/admin/package-clear", clearPackage)
 app.post("/admin/withdrawal-list", getPendingWithdrawals)
 app.post("/admin/withdraw-serve", serveWithdrawal)
+app.post("/admin/withdraw-clear", clearWithdrawal)
 app.post("/admin/shareturnover", shareTurnover)
 /////////////////////////////////////////////////////////////////////
 app.post("/send-otp", sendOtp)
