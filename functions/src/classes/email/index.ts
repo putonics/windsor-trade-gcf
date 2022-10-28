@@ -1,39 +1,62 @@
-import { firestore } from 'firebase-admin';
-const nodemailer = require('nodemailer')
+import { firestore } from "firebase-admin"
+const nodemailer = require("nodemailer")
 
-const sendMail = async (user: string, pass: string, to: string, subject: string, text: string, html: string, cc: Array<string> = []) =>
-    new Promise<boolean>((resolve, reject) => {
-        const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } })
-        const mailOptions = { from: user, to, subject, text, html, cc }
-        transporter.sendMail(mailOptions, (err: any, sucess: any) => {
-            if (err) {
-                console.log(err)
-                resolve(false)
-            } else {
-                resolve(true)
-            }
-        })
+const sendMail = async (
+  user: string,
+  pass: string,
+  to: string,
+  subject: string,
+  text: string,
+  html: string,
+  cc: Array<string> = []
+) =>
+  new Promise<boolean>((resolve, reject) => {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
     })
+    const mailOptions = { from: user, to, subject, text, html, cc }
+    transporter.sendMail(mailOptions, (err: any, sucess: any) => {
+      if (err) {
+        console.log(err)
+        resolve(false)
+      } else {
+        resolve(true)
+      }
+    })
+  })
 
-export const sendEmail = async (to: string, subject: string, text: string, html: string, cc: Array<string> = []): Promise<boolean> => {
-    if (!(to && subject && (text || html))) return false
-    let user = 'support@windsortrad.com'
-    let pass = 'wcadmin@windsortrad'
-    const snap = await firestore().collection('const').doc('EmailServer').get()
-    if (snap && snap.exists) {
-        const data = snap.data()
-        if (data) {
-            user = data.user ? data.user : user
-            pass = data.pass ? data.pass : pass
-        }
+export const sendEmail = async (
+  to: string,
+  subject: string,
+  text: string,
+  html: string,
+  cc: Array<string> = []
+): Promise<boolean> => {
+  if (!(to && subject && (text || html))) return false
+  let user = "read-from-doc"
+  let pass = "read-from-doc"
+  const snap = await firestore().collection("const").doc("EmailServer").get()
+  if (snap && snap.exists) {
+    const data = snap.data()
+    if (data) {
+      user = data.user ? data.user : user
+      pass = data.pass ? data.pass : pass
     }
-    return await sendMail(user, pass, to, subject, text, html, cc)
+  }
+  return await sendMail(user, pass, to, subject, text, html, cc)
 }
 
-
-export const sendEmail_UserRegistration = async (to: string, name: string, docid: string) => {
-    await sendEmail(to, 'Registration successfull @ windsortrad.com', '',
-        `
+export const sendEmail_UserRegistration = async (
+  to: string,
+  name: string,
+  docid: string
+) => {
+  await sendEmail(
+    to,
+    "Registration successfull @ windsortrad.com",
+    "",
+    `
         <!DOCTYPE html>
         <html>
             <head>
@@ -59,14 +82,22 @@ export const sendEmail_UserRegistration = async (to: string, name: string, docid
             </body>
         </html>   
     `
-    )
+  )
 }
 
-export const sendEmail_AddPackage = async (to: string, ownername: string, ownerdocid: string,
-    pkgAmount: number, totalPackageAmount: number, cc?: string
+export const sendEmail_AddPackage = async (
+  to: string,
+  ownername: string,
+  ownerdocid: string,
+  pkgAmount: number,
+  totalPackageAmount: number,
+  cc?: string
 ) => {
-    await sendEmail(to, `Package $${pkgAmount} alloted successfully`, '',
-        `
+  await sendEmail(
+    to,
+    `Package $${pkgAmount} alloted successfully`,
+    "",
+    `
         <!DOCTYPE html>
         <html>
             <head>
@@ -75,7 +106,9 @@ export const sendEmail_AddPackage = async (to: string, ownername: string, ownerd
             <body>
                 <h3>Thank you! ${ownername}</h3>
                 <div style="display:flex;justify-content:center;flex-direction:row;">
-                <h1>You won <span style="color:#ff0000;font-weight:900;">${pkgAmount * 5}</span> &times; </h1>
+                <h1>You won <span style="color:#ff0000;font-weight:900;">${
+                  pkgAmount * 5
+                }</span> &times; </h1>
                 <img style="width:48px;height:48px;" src="https://windsorcryptocoin.com/img/bg-img/bg-2.png"/>
                 <h1> WINDSOR Coins</h1>
                 </div>
@@ -93,13 +126,22 @@ export const sendEmail_AddPackage = async (to: string, ownername: string, ownerd
                 <br/><img style="margin-left:20px;" src="https://windsorcryptocoin.com/img/core-img/logo.png" />
             </body>
         </html>   
-    `, cc ? [cc] : [])
+    `,
+    cc ? [cc] : []
+  )
 }
 
-export const sendEmail_WithdrawalRequest = async (to: string, ownername: string, ownerdocid: string,
-    amount: number) => {
-    await sendEmail(to, `Withdrawal Request initiated`, '',
-        `
+export const sendEmail_WithdrawalRequest = async (
+  to: string,
+  ownername: string,
+  ownerdocid: string,
+  amount: number
+) => {
+  await sendEmail(
+    to,
+    `Withdrawal Request initiated`,
+    "",
+    `
         <!DOCTYPE html>
         <html>
             <head>
@@ -123,14 +165,21 @@ export const sendEmail_WithdrawalRequest = async (to: string, ownername: string,
             </body>
         </html>   
     `
-    )
+  )
 }
 
-export const sendEmail_Withdrawal = async (to: string, ownername: string, ownerdocid: string,
-    amount: number, balance: number
+export const sendEmail_Withdrawal = async (
+  to: string,
+  ownername: string,
+  ownerdocid: string,
+  amount: number,
+  balance: number
 ) => {
-    await sendEmail(to, `Withdrawal $${amount} successfully`, '',
-        `
+  await sendEmail(
+    to,
+    `Withdrawal $${amount} successfully`,
+    "",
+    `
         <!DOCTYPE html>
         <html>
             <head>
@@ -153,16 +202,21 @@ export const sendEmail_Withdrawal = async (to: string, ownername: string, ownerd
             </body>
         </html>   
     `
-    )
+  )
 }
 
 export const sendEmail_PackageRequestSent = async (
-    toSender: string, toReceiver: string,
-    ownername: string, ownerdocid: string,
-    amount: number
+  toSender: string,
+  toReceiver: string,
+  ownername: string,
+  ownerdocid: string,
+  amount: number
 ) => {
-    await sendEmail(toReceiver, `Package added successfully`, '',
-        `
+  await sendEmail(
+    toReceiver,
+    `Package added successfully`,
+    "",
+    `
         <!DOCTYPE html>
         <html>
             <head>
@@ -184,13 +238,21 @@ export const sendEmail_PackageRequestSent = async (
                 <br/><img style="margin-left:20px;" src="https://windsorcryptocoin.com/img/core-img/logo.png" />
             </body>
         </html>   
-    `, [toSender]
-    )
+    `,
+    [toSender]
+  )
 }
 
-export const sendEmail_OTP = async (to: string, requestid: string, otp: string) => {
-    await sendEmail(to, `OTP for request-id ${requestid}`, '',
-        `
+export const sendEmail_OTP = async (
+  to: string,
+  requestid: string,
+  otp: string
+) => {
+  await sendEmail(
+    to,
+    `OTP for request-id ${requestid}`,
+    "",
+    `
         <!DOCTYPE html>
         <html>
             <head>
@@ -209,5 +271,5 @@ export const sendEmail_OTP = async (to: string, requestid: string, otp: string) 
             </body>
         </html>   
     `
-    )
+  )
 }
